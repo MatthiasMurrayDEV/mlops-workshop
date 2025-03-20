@@ -22,11 +22,11 @@ else
     aws logs create-log-group --log-group-name /ecs/$SERVICE_NAME
 fi
 
-# check if ecs service exists, if not create it, else update it
-SERVICE_EXISTS=$(aws ecs describe-services --cluster mlops-workshop-cluster --services $SERVICE_NAME --query 'services[0].serviceName' --output text)
+# check if ecs service exists
+SERVICE_EXISTS=$(aws ecs describe-services --cluster mlops-workshop-cluster --services $SERVICE_NAME --query 'services[0].status' --output text)
 if [ "$SERVICE_EXISTS" == "ACTIVE" ]; then
     echo "Service exists. Updating the service..."
-    aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
+    aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $SERVICE_NAME --force-new-deployment
 else
     echo "Service does not yet exist. Creating ECS service..."
     echo "Setting up ALB routing for $SERVICE_NAME..."
@@ -47,7 +47,6 @@ else
 fi
 
 # Get DNS for the load balancer
-# Get the DNS name of the load balancer
 DNS_NAME=$(aws elbv2 describe-load-balancers --names mlops-workshop-alb --query 'LoadBalancers[0].DNSName' --output text)
 
 # Construct the service URL
