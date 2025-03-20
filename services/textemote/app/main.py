@@ -15,7 +15,7 @@ except Exception as e:
 
 service_name = os.getenv("SERVICE_NAME", "default_service")
 
-app = FastAPI()
+app = FastAPI(root_path=f"/{service_name}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,12 +32,12 @@ class InputText(BaseModel):
 
 logger.info(f"Service {service_name} started")
 
-@app.get(f"/{service_name}/health")
+@app.get("/health")
 async def health_check():
     logger.info("Health check")
     return {"status": "ok"}
 
-@app.post(f"/{service_name}/predict")
+@app.post("/predict")
 async def predict(input: InputText):
     try:
         logger.info(f"Predicting for text: {input.text}")
